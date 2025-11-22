@@ -15,6 +15,7 @@ namespace Kuros.Core
         [Export] public bool AutoDisableTriggerOnPickup = true;
 
         [ExportGroup("Attachment")]
+        [Export] public string AttachmentBoneName = "";
         [Export] public NodePath AttachmentPointPath = new NodePath();
         [Export] public Vector2 AttachedLocalOffset = Vector2.Zero;
 
@@ -82,7 +83,30 @@ namespace Kuros.Core
         {
             Node targetParent = actor;
 
-            if (AttachmentPointPath.GetNameCount() > 0)
+            // Priority 1: Bone Name (if actor has a Skeleton2D)
+            if (!string.IsNullOrEmpty(AttachmentBoneName))
+            {
+                var skeleton = actor.GetNodeOrNull<Skeleton2D>("SpineCharacter/Skeleton2D") ?? 
+                               actor.GetNodeOrNull<Skeleton2D>("Skeleton2D") ??
+                               actor.FindChild("Skeleton2D", true, false) as Skeleton2D;
+
+                if (skeleton != null)
+                {
+                    // Find the bone node by name (Godot 4 Skeleton2D structure: Skeleton2D -> Bone2D nodes)
+                    var boneNode = skeleton.FindChild(AttachmentBoneName, true, false);
+                    if (boneNode != null)
+                    {
+                        targetParent = boneNode;
+                        GD.Print($"Attached {Name} to bone node: {boneNode.Name}");
+                    }
+                    else
+                    {
+                        GD.PrintErr($"Bone '{AttachmentBoneName}' not found in {actor.Name}'s skeleton.");
+                    }
+                }
+            }
+            // Priority 2: Explicit NodePath
+            else if (AttachmentPointPath.GetNameCount() > 0)
             {
                 var explicitTarget = actor.GetNodeOrNull<Node>(AttachmentPointPath);
                 if (explicitTarget != null)

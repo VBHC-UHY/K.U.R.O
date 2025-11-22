@@ -12,5 +12,9 @@ EnergyValue = 25
 PickedColor = Color(0.19607843, 0.8039216, 0.19607843, 1)
 DropWorldOffset = Vector2(0, 25)
 
+[node name="TriggerArea" parent="." index="0"]
+visible = false
+
 [node name="Sprite2D" type="Sprite2D" parent="." index="1"]
+scale = Vector2(4.2146144, 4.2146144)
 texture = SubResource("PlaceholderTexture2D_drop")
